@@ -10,7 +10,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 # 👇 PASTE YOUR KEYS HERE
 # ======================================================
 os.environ["GROQ_API_KEY"] = "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"
-os.environ["TAVILY_API_KEY"] = "TAVILY_API_KEY"
+os.environ["TAVILY_API_KEY"] = "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"
 
 # --- MODELS ---
 # Main brain for chatting
@@ -85,4 +85,5 @@ def generate_response(user_input, file_bytes=None, file_type=None, history=[]):
     except Exception as e:
 
         return f"Error: {str(e)}"
+
 
