@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZISH | AI Workspace</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: { obsidian: '#09090b', charcoal: '#18181b' },
+                    animation: { 'fade-in': 'fadeIn 0.3s ease-out' },
+                    keyframes: { fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } } }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-obsidian text-gray-200 h-screen flex overflow-hidden">
+
+    <aside id="sidebar" class="w-[280px] bg-obsidian border-r border-white/5 flex flex-col z-30 relative shrink-0 transition-all duration-300 overflow-hidden">
+        <div class="p-5 flex items-center justify-between">
+            <div class="flex items-center gap-2 sidebar-text">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center"><i class="fas fa-bolt text-white text-xs"></i></div>
+                <h1 class="font-semibold text-lg text-white">Zish.ai</h1>
+            </div>
+            </div>
+
+        <div class="px-4 mb-4">
+            <button onclick="startNewChat()" class="w-full flex items-center gap-3 bg-white/5 hover:bg-white/10 text-gray-300 p-3 rounded-xl border border-white/5 transition whitespace-nowrap overflow-hidden">
+                <i class="fas fa-plus text-sm"></i> <span class="text-sm font-medium sidebar-text">New Chat</span>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-2 space-y-1" id="history-list"></div>
+
+        <div class="p-4 border-t border-white/5 mt-auto sidebar-text">
+            {% if user %}
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer whitespace-nowrap overflow-hidden" onclick="window.location.href='/logout'">
+                <img src="{{ user.picture }}" class="w-8 h-8 rounded-full border border-white/10">
+                <div class="flex flex-col">
+                    <span class="text-xs font-medium text-white">{{ user.name }}</span>
+                    <span class="text-[10px] text-gray-500">Tap to logout</span>
+                </div>
+            </div>
+            {% else %}
+            <a href="/login" class="flex items-center gap-3 p-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition justify-center shadow-lg whitespace-nowrap overflow-hidden">
+                <i class="fab fa-google"></i> <span class="text-xs font-bold">Login</span>
+            </a>
+            {% endif %}
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col relative bg-[#09090b] min-w-0">
+        <header class="h-16 flex items-center gap-4 px-6 border-b border-white/5 bg-obsidian/80 backdrop-blur-md sticky top-0 z-20">
+            <button onclick="toggleSidebar()" class="text-gray-400 hover:text-white transition">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
+            <span id="chat-title" class="font-medium text-gray-400 text-sm">New Session</span>
+        </header>
+
+        <div id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
+            <div id="welcome-screen" class="h-full flex flex-col items-center justify-center text-center">
+                <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center mb-6 shadow-2xl">
+                    <i class="fas fa-sparkles text-2xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">How can I help you?</h2>
+            </div>
+            
+            <div class="h-48 w-full flex-shrink-0 order-last"></div> 
+        </div>
+
+        <div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#09090b] via-[#09090b] to-transparent z-50">
+            <div class="max-w-4xl mx-auto">
+                <div id="file-preview" class="hidden mb-2 inline-flex items-center gap-2 bg-blue-500/10 text-blue-400 px-3 py-1.5 rounded-lg text-xs border border-blue-500/20">
+                    <i class="fas fa-file"></i> <span id="filename-display">file.pdf</span>
+                    <button onclick="clearFile()" class="hover:text-white ml-2"><i class="fas fa-times"></i></button>
+                </div>
+
+                <div class="bg-charcoal border border-white/10 rounded-2xl shadow-2xl flex flex-col focus-within:border-blue-500/50 transition">
+                    <textarea id="user-input" rows="1" class="w-full bg-transparent text-white placeholder-gray-500 p-4 resize-none focus:outline-none max-h-40" placeholder="Ask anything..."></textarea>
+                    <div class="flex items-center justify-between px-2 pb-2">
+                        <button onclick="document.getElementById('file-upload').click()" class="p-2 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition"><i class="fas fa-paperclip"></i></button>
+                        <input type="file" id="file-upload" class="hidden" onchange="handleFile(this)">
+                        <button onclick="sendMessage()" class="bg-white text-black hover:bg-gray-200 px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">Send <i class="fas fa-arrow-up text-xs"></i></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentSessionId = "new";
+        let currentFile = null;
+        let isSidebarOpen = true;
+        const ta = document.getElementById('user-input');
+        
+        ta.addEventListener('input', function(){ this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
+
+        // SIDEBAR TOGGLE LOGIC
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const texts = document.querySelectorAll('.sidebar-text');
+            
+            if (isSidebarOpen) {
+                // Close it (minimize width to 0)
+                sidebar.classList.remove('w-[280px]', 'p-5');
+                sidebar.classList.add('w-0', 'p-0');
+            } else {
+                // Open it
+                sidebar.classList.remove('w-0', 'p-0');
+                sidebar.classList.add('w-[280px]', 'p-5');
+            }
+            isSidebarOpen = !isSidebarOpen;
+        }
+
+        async function loadSessions() {
+            const res = await fetch('/api/sessions');
+            const sessions = await res.json();
+            const list = document.getElementById('history-list');
+            list.innerHTML = '';
+            
+            sessions.forEach(sess => {
+                const btn = document.createElement('div');
+                btn.className = 'group flex items-center justify-between p-3 text-sm text-gray-400 hover:bg-white/5 hover:text-white rounded-xl cursor-pointer transition whitespace-nowrap overflow-hidden';
+                
+                const span = document.createElement('span');
+                span.className = 'truncate max-w-[180px] sidebar-text';
+                span.innerText = sess.title;
+                span.onclick = () => loadChat(sess.id, sess.title);
+
+                const del = document.createElement('button');
+                del.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                del.className = 'opacity-0 group-hover:opacity-100 text-gray-500 hover:text-red-400 transition px-2';
+                del.onclick = (e) => deleteChat(e, sess.id);
+
+                btn.appendChild(span);
+                btn.appendChild(del);
+                list.appendChild(btn);
+            });
+        }
+
+        async function deleteChat(e, id) {
+            e.stopPropagation();
+            if (!confirm("Delete this chat?")) return;
+            await fetch(`/api/chat/${id}`, { method: 'DELETE' });
+            
+            // Fix: If deleting active chat, reset to new
+            if (currentSessionId === id) startNewChat();
+            
+            // Fix: Reload list immediately
+            loadSessions();
+        }
+
+        async function loadChat(id, title) {
+            currentSessionId = id;
+            document.getElementById('chat-title').innerText = title;
+            document.getElementById('welcome-screen').classList.add('hidden');
+            const container = document.getElementById('chat-container');
+            container.innerHTML = '<div class="h-48 w-full flex-shrink-0 order-last"></div>'; 
+            
+            const res = await fetch(`/api/history/${id}`);
+            const messages = await res.json();
+            messages.forEach(msg => appendMessage(msg.role, msg.content));
+            scrollToBottom();
+        }
+
+        function handleFile(input) {
+            if (input.files && input.files[0]) {
+                currentFile = input.files[0];
+                document.getElementById('file-preview').classList.remove('hidden');
+                document.getElementById('file-preview').classList.add('inline-flex');
+                document.getElementById('filename-display').innerText = currentFile.name;
+            }
+        }
+        function clearFile() {
+            currentFile = null;
+            document.getElementById('file-upload').value = '';
+            document.getElementById('file-preview').classList.add('hidden');
+            document.getElementById('file-preview').classList.remove('inline-flex');
+        }
+
+        function appendMessage(role, text) {
+            const container = document.getElementById('chat-container');
+            const spacer = container.lastElementChild;
+            const div = document.createElement('div');
+            const isUser = role === 'user';
+            div.className = `flex ${isUser ? 'justify-end' : 'justify-start'} animate-fade-in mb-6`;
+            div.innerHTML = `<div class="${isUser ? 'bg-[#27272a] text-white' : 'text-gray-300'} px-5 py-3 rounded-2xl max-w-[85%] border ${isUser ? 'border-white/5 shadow-md' : 'border-transparent'}"><div class="prose prose-invert text-sm leading-relaxed">${isUser ? text : marked.parse(text)}</div></div>`;
+            container.insertBefore(div, spacer);
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const text = input.value.trim();
+            if (!text && !currentFile) return;
+
+            document.getElementById('welcome-screen').classList.add('hidden');
+            appendMessage('user', text);
+            input.value = ''; input.style.height = 'auto';
+
+            const formData = new FormData();
+            formData.append('session_id', currentSessionId);
+            formData.append('message', text);
+            if (currentFile) formData.append('file', currentFile);
+            
+            clearFile(); scrollToBottom();
+
+            const container = document.getElementById('chat-container');
+            const spacer = container.lastElementChild;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading';
+            loadingDiv.className = 'flex justify-start animate-fade-in mb-6';
+            loadingDiv.innerHTML = '<div class="text-gray-500 text-sm px-5 py-3"><i class="fas fa-circle-notch fa-spin mr-2"></i> Thinking...</div>';
+            container.insertBefore(loadingDiv, spacer);
+
+            const res = await fetch('/api/chat', { method: 'POST', body: formData });
+            const data = await res.json();
+            
+            document.getElementById('loading').remove();
+            appendMessage('ai', data.response);
+            if (currentSessionId === 'new') {
+                currentSessionId = data.session_id;
+                document.getElementById('chat-title').innerText = data.title;
+                loadSessions();
+            }
+            scrollToBottom();
+        }
+
+        function scrollToBottom() { const c = document.getElementById('chat-container'); c.scrollTop = c.scrollHeight; }
+        function startNewChat() { location.reload(); }
+        loadSessions();
+    </script>
+</body>
+</html>
