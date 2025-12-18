@@ -9,8 +9,8 @@ import database as db
 import agent
 
 # --- CONFIG ---
-GOOGLE_CLIENT_ID = "369710183064-398uss04ubg7sjgv23kk2b39hr03q1ti.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET = "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"
+GOOGLE_CLIENT_ID = "GOOGLE_CLIENT_ID"
+GOOGLE_CLIENT_SECRET = "GOOGLE_CLIENT_SECRET"
 SECRET_KEY = "zish_secret_key"
 
 if not os.path.exists("static"): os.makedirs("static")
@@ -99,4 +99,5 @@ async def chat(request: Request, session_id: str = Form(...), message: str = For
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
