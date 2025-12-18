@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+python-multipart
+jinja2
+langchain-groq
+langchain-community
+tavily-python
+pypdf
+requests
+itsdangerous
+authlib
+httpx
+pydantic
