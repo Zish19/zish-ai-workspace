@@ -9,8 +9,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 # ======================================================
 # 👇 PASTE YOUR KEYS HERE
 # ======================================================
-os.environ["GROQ_API_KEY"] = "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"
-os.environ["TAVILY_API_KEY"] = "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"
+os.environ["GROQ_API_KEY"] = "KEY"
+os.environ["TAVILY_API_KEY"] = "KEY"
 
 # --- MODELS ---
 # Main brain for chatting
