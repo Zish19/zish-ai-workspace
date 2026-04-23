@@ -6,9 +6,7 @@ from langchain_groq import ChatGroq
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import HumanMessage, SystemMessage
 
-# ======================================================
-# 👇 PASTE YOUR KEYS HERE
-# ======================================================
+
 os.environ["GROQ_API_KEY"] = "KEY"
 os.environ["TAVILY_API_KEY"] = "KEY"
 
