@@ -8,7 +8,6 @@ DB_NAME = "zish.db"
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
-    # Updated: Added user_email column
     c.execute('''CREATE TABLE IF NOT EXISTS sessions 
                  (id TEXT PRIMARY KEY, title TEXT, user_email TEXT, created_at DATETIME)''')
     c.execute('''CREATE TABLE IF NOT EXISTS messages 
@@ -17,7 +16,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-# Updated: Requires user_email
 def create_session(title, user_email):
     session_id = str(uuid.uuid4())
     conn = sqlite3.connect(DB_NAME)
@@ -35,7 +33,6 @@ def save_message(session_id, role, content, image_data=None):
     conn.commit()
     conn.close()
 
-# Updated: Filters by email
 def get_sessions(user_email):
     conn = sqlite3.connect(DB_NAME)
     c = conn.cursor()
