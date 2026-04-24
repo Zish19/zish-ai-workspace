@@ -10,12 +10,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 os.environ["GROQ_API_KEY"] = "KEY"
 os.environ["TAVILY_API_KEY"] = "KEY"
 
-# --- MODELS ---
-# Main brain for chatting
+
 llm_text = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=0.6)
-# Fast brain for naming chats
+
 llm_fast = ChatGroq(model_name="llama-3.1-8b-instant", temperature=0.5)
-# Vision brain
+
 llm_vision = ChatGroq(model_name="llama-3.2-11b-vision-preview", temperature=0.5)
 
 tavily = TavilySearchResults(max_results=3)
@@ -43,7 +42,7 @@ def get_pdf_text(file_bytes):
 def generate_response(user_input, file_bytes=None, file_type=None, history=[]):
     messages = []
     
-    # --- 1. HANDLE FILES ---
+
     if file_bytes and file_type:
         if "pdf" in file_type or "text" in file_type:
             doc_text = get_pdf_text(file_bytes)
@@ -57,7 +56,7 @@ def generate_response(user_input, file_bytes=None, file_type=None, history=[]):
             ])
             return llm_vision.invoke([msg]).content
 
-    # --- 2. SEARCH ---
+
     if any(k in user_input.lower() for k in ["news", "price", "search", "latest", "who is", "current"]):
         try:
             results = tavily.invoke({"query": user_input})
@@ -66,7 +65,7 @@ def generate_response(user_input, file_bytes=None, file_type=None, history=[]):
         except:
             pass
 
-    # --- 3. CHAT ---
+ 
     messages.append(SystemMessage(content="You are Zish, a helpful AI assistant."))
     for msg in history[-4:]:
         role = msg['role']
