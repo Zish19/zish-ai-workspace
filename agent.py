@@ -7,8 +7,10 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.messages import HumanMessage, SystemMessage
 
 
-os.environ["GROQ_API_KEY"] = "KEY"
-os.environ["TAVILY_API_KEY"] = "KEY"
+# Use environment variables if available, otherwise use a fallback (which will cause a 401 error on actual generation)
+# You MUST set these in the Vercel Dashboard -> Settings -> Environment Variables
+os.environ["GROQ_API_KEY"] = os.environ.get("GROQ_API_KEY", "KEY")
+os.environ["TAVILY_API_KEY"] = os.environ.get("TAVILY_API_KEY", "KEY")
 
 
 llm_text = ChatGroq(model_name="llama-3.3-70b-versatile", temperature=0.6)
