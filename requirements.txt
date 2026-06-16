@@ -8,6 +8,6 @@ tavily-python
 pypdf
 requests
 itsdangerous
-authlib
+bcrypt
 httpx
 pydantic
