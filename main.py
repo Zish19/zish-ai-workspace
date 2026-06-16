@@ -5,6 +5,12 @@ from fastapi import FastAPI
 
 app = FastAPI()
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    import traceback
+    from fastapi.responses import PlainTextResponse
+    return PlainTextResponse(traceback.format_exc(), status_code=500)
+
 try:
     from fastapi import Request, UploadFile, File, Form
     from fastapi.staticfiles import StaticFiles
