@@ -44,7 +44,7 @@ def verify_password(password: str, hashed: str) -> bool:
         return False
 
 # Authentication Endpoints
-@app.post("/auth/signup")
+@app.post("/api/auth/signup")
 async def signup(name: str = Form(...), email: str = Form(...), password: str = Form(...)):
     email = email.lower().strip()
     if db.get_user(email):
@@ -56,7 +56,7 @@ async def signup(name: str = Form(...), email: str = Form(...), password: str = 
     else:
         raise HTTPException(status_code=500, detail="Failed to create user")
 
-@app.post("/auth/login")
+@app.post("/api/auth/login")
 async def login(request: Request, email: str = Form(...), password: str = Form(...)):
     email = email.lower().strip()
     user = db.get_user(email)
@@ -69,12 +69,12 @@ async def login(request: Request, email: str = Form(...), password: str = Form(.
     }
     return {"status": "ok", "user": {"name": user["name"], "email": user["email"]}}
 
-@app.post("/auth/logout")
+@app.post("/api/auth/logout")
 async def logout(request: Request):
     request.session.pop('user', None)
     return {"status": "ok"}
 
-@app.get("/auth/me")
+@app.get("/api/auth/me")
 async def me(request: Request):
     user = request.session.get('user')
     if not user:
@@ -82,21 +82,21 @@ async def me(request: Request):
     return {"user": user}
 
 # Chat Endpoints (Authenticated)
-@app.get("/sessions")
+@app.get("/api/sessions")
 async def get_sessions(request: Request):
     email = get_user_email(request)
     if not email:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return db.get_sessions(email)
 
-@app.get("/history/{session_id}")
+@app.get("/api/history/{session_id}")
 async def get_history(request: Request, session_id: str):
     email = get_user_email(request)
     if not email:
         raise HTTPException(status_code=401, detail="Not authenticated")
     return db.get_history(session_id)
 
-@app.delete("/chat/{session_id}")
+@app.delete("/api/chat/{session_id}")
 async def delete_chat(request: Request, session_id: str):
     email = get_user_email(request)
     if not email:
@@ -104,7 +104,7 @@ async def delete_chat(request: Request, session_id: str):
     db.delete_session(session_id)
     return {"status": "ok"}
 
-@app.post("/chat")
+@app.post("/api/chat")
 async def chat(
     request: Request, 
     session_id: str = Form(...), 
@@ -135,7 +135,7 @@ async def chat(
 
 @app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
 async def catch_all(request: Request, path_name: str):
-    return {"detail": "Catch-all triggered", "path_name": path_name, "scope_path": request.scope.get("path"), "url": str(request.url)}
+    return {"detail": "Catch-all triggered", "path_name": path_name, "scope_path": request.scope.get("path"), "root_path": request.scope.get("root_path"), "url": str(request.url)}
 
 if __name__ == "__main__":
     import uvicorn
