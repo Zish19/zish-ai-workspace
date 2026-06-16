@@ -1,7 +1,7 @@
 import os
 import sys
 import traceback
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -35,11 +35,11 @@ def get_user_email(request: Request):
     return None
 
 def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    return generate_password_hash(password)
 
 def verify_password(password: str, hashed: str) -> bool:
     try:
-        return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
+        return check_password_hash(hashed, password)
     except Exception:
         return False
 
