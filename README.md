@@ -25,14 +25,6 @@ Zish.ai is a powerful, full-stack AI assistant built with a modern Next.js React
 
 ---
 
-## Demo Animations
-
-*(Add GIF of Login/Signup Flow here)*
-
-*(Add GIF of Chat Interface and Sidebar here)*
-
----
-
 ## Tech Stack
 
 * **Frontend:** Next.js (React), Tailwind CSS, Framer Motion
