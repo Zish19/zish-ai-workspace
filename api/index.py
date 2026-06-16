@@ -6,8 +6,8 @@ from fastapi import FastAPI, Request, UploadFile, File, Form, HTTPException, sta
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.sessions import SessionMiddleware
-import database as db
-import agent
+from api import database as db
+from api import agent
 
 app = FastAPI()
 
