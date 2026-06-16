@@ -13,17 +13,23 @@ GOOGLE_CLIENT_ID = "369710183064-398uss04ubg7sjgv23kk2b39hr03q1ti.apps.googleuse
 GOOGLE_CLIENT_SECRET = "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"
 SECRET_KEY = "zish_secret_key"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
+
 try:
-    if not os.path.exists("static"): os.makedirs("static")
-    if not os.path.exists("templates"): os.makedirs("templates")
+    if not os.path.exists(STATIC_DIR): os.makedirs(STATIC_DIR)
+    if not os.path.exists(TEMPLATES_DIR): os.makedirs(TEMPLATES_DIR)
 except OSError:
     pass
 
-
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+
+if os.path.exists(STATIC_DIR):
+    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+templates = Jinja2Templates(directory=TEMPLATES_DIR)
 db.init_db()
 
 oauth = OAuth()
