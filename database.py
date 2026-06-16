@@ -66,4 +66,4 @@ def delete_session(session_id):
     conn.commit()
     conn.close()
 
-init_db()
+# init_db() is now called from main.py startup event
