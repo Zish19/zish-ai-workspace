@@ -133,10 +133,6 @@ async def chat(
         "title": db.get_session_title(session_id) 
     })
 
-@app.api_route("/{path_name:path}", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH", "TRACE"])
-async def catch_all(request: Request, path_name: str):
-    return {"detail": "Catch-all triggered", "path_name": path_name, "scope_path": request.scope.get("path"), "root_path": request.scope.get("root_path"), "url": str(request.url)}
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
