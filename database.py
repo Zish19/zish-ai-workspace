@@ -1,9 +1,10 @@
 import sqlite3
 import json
 import uuid
+import os
 from datetime import datetime
 
-DB_NAME = "zish.db"
+DB_NAME = "/tmp/zish.db" if os.environ.get("VERCEL") else "zish.db"
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)

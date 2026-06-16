@@ -13,8 +13,12 @@ GOOGLE_CLIENT_ID = "369710183064-398uss04ubg7sjgv23kk2b39hr03q1ti.apps.googleuse
 GOOGLE_CLIENT_SECRET = "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"
 SECRET_KEY = "zish_secret_key"
 
-if not os.path.exists("static"): os.makedirs("static")
-if not os.path.exists("templates"): os.makedirs("templates")
+try:
+    if not os.path.exists("static"): os.makedirs("static")
+    if not os.path.exists("templates"): os.makedirs("templates")
+except OSError:
+    pass
+
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
